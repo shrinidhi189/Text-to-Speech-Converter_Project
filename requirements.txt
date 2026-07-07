@@ -1,0 +1,16 @@
+Flask
+edge-tts
+gunicorn
+
+// These are packages/libraries in python - mainly used for text to speech conversion
+
+// Flask 
+  - A lightweight python web framework.
+
+//edge-tts
+  - A python library which allows us to use microsoft edge's text-to-speech(tts) voices for free.
+  - we don't have to create any azure account or api key while using this.
+  - It acts as a free alternative for amazon polly.
+
+//gunicorn 
+  - It is a production web server(WSGI HTTP server) used to run python web applications. 
