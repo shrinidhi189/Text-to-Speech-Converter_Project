@@ -1,2 +1,128 @@
-# Text-to-Speech-Converter---ML-Project
-Text to Speech Converter - ML Project
+# AI Text-to-Speech Converter
+
+Flask + edge-tts web app that converts typed text into speech using Microsoft
+Edge's free neural voices, with playback, download, and a conversion history.
+
+## Project structure
+
+```
+tts-app/
+├── app.py                  # Flask backend + edge-tts calls
+├── requirements.txt
+├── templates/
+│   └── index.html          # Page markup
+├── static/
+│   ├── css/style.css       # Light theme styling
+│   ├── js/script.js        # Fetch calls, playback, history table
+│   └── audio/              # Generated .mp3 files land here
+└── history.json             # Auto-created; stores conversion history
+```
+
+## How it works
+
+1. **Frontend** (`index.html` + `script.js`) collects text, a voice choice,
+   and a speed value, then POSTs them to `/api/convert`.
+2. **Backend** (`app.py`) calls `edge_tts.Communicate(text, voice, rate=...)`,
+   which streams audio from Microsoft's Edge Read Aloud service and saves it
+   as an `.mp3` under `static/audio/`.
+3. The response includes the audio URL, which the browser plays immediately
+   with an `<audio>` element and adds to the on-page history table.
+4. History is persisted server-side in `history.json` so it survives a page
+   refresh or server restart. Deleting a row removes both the JSON entry and
+   the `.mp3` file.
+
+## Run it locally
+
+```bash
+git clone https://github.com/shrinidhi189/Text-to-Speech-Converter_ML-Project
+cd Text-to-Speech-Converter_ML-Project
+
+python -m venv venv
+source venv/bin/activate        # venv\Scripts\activate on Windows
+
+pip install -r requirements.txt
+python app.py
+```
+
+Open `http://127.0.0.1:5000`. No API key is needed — `edge-tts` talks
+directly to Microsoft's public Edge voice service over the internet, so you
+do need an internet connection, but not an Azure account.
+
+## Customizing voices
+
+`VOICES` in `app.py` is a hand-picked shortlist. To see everything edge-tts
+offers:
+
+```bash
+edge-tts --list-voices | grep en-
+```
+
+Add any voice ID + a friendly label to the `VOICES` list and it shows up in
+the dropdown automatically.
+
+## Is this resume-worthy?
+
+Yes, with the right framing — it's a legitimate full-stack project, not a
+toy script. What makes it count:
+
+- **Full-stack, not just a script**: REST API (`Flask`) + async I/O
+  (`asyncio` + `edge-tts`) + a hand-built frontend, not a Jupyter notebook.
+- **Third-party API integration**: consuming an external speech service,
+  handling its failures (rate limits, network errors) gracefully with proper
+  HTTP status codes.
+- **State management**: server-side history persisted to disk, file
+  cleanup on delete — shows you think about more than the happy path.
+- **Real UI work**: responsive layout, accessible controls, loading/error
+  states — not just "it works on my machine."
+
+What would make it stronger for a resume bullet or interview talking point:
+add basic tests (`pytest` + Flask's test client, which is what was used to
+verify these routes), and mention *why* you chose async for the TTS call
+(non-blocking I/O while Microsoft's service generates audio).
+
+Suggested resume bullet:
+> Built a full-stack text-to-speech web app (Flask, edge-tts, vanilla JS)
+> with async speech synthesis, a persisted conversion history, and file
+> management; deployed on Render.
+
+## Deployment
+
+`edge-tts` needs outbound internet access to Microsoft's speech endpoint, so
+pick a host that allows outbound connections on a normal web dyno (all three
+below do).
+
+### Option A — Render (free tier, easiest)
+
+1. Push this project to a GitHub repo.
+2. On [render.com](https://render.com) → **New +** → **Web Service** → connect
+   the repo.
+3. Settings:
+   - **Build command**: `pip install -r requirements.txt`
+   - **Start command**: `gunicorn app:app`
+   - **Environment**: Python 3
+4. Deploy. Render builds and gives you a public URL.
+
+Note: Render's free instances spin down when idle and take ~30-50s to wake
+up on the next request — expected, not a bug.
+
+### Option B — Railway
+
+1. [railway.app](https://railway.app) → **New Project** → **Deploy from
+   GitHub repo**.
+2. Railway auto-detects Python. Set the start command to `gunicorn app:app`
+   if it isn't picked up automatically.
+3. Deploy — Railway gives you a public domain.
+
+### Option C — PythonAnywhere
+
+1. Upload the project (or `git clone` it in a Bash console).
+2. `pip install -r requirements.txt --user`.
+3. In the **Web** tab, create a new Flask app pointing at `app.py`, set the
+   working directory, and reload.
+
+### A note on `static/audio/`
+
+Generated `.mp3` files accumulate over time on the server's disk. For a
+resume/demo deployment that's fine, but for anything longer-lived, add a
+cleanup job (e.g. delete files older than N days) or move to cheap object
+storage (S3/R2) instead of local disk.
