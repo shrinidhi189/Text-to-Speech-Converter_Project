@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text to Speech Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <div class="mic-badge" id="micBadge">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      <span class="bar"></span><span class="bar"></span>
+    </div>
+    <h1>AI Text&nbsp;to&nbsp;Speech Converter</h1>
+    <p class="subtitle">Turn written words into natural speech using Microsoft Edge neural voices.</p>
+  </header>
+  <main class="card">
+
+    <section class="field-group">
+      <div class="field-label-row">
+        <label for="textInput">Enter text</label>
+        <span class="char-count"><span id="charCount">0</span> / 3000</span>
+      </div>
+      <textarea id="textInput" placeholder="Type or paste your text here..." maxlength="3000"></textarea>
+    </section>
+
+    <section class="controls-row">
+      <div class="field-group half">
+        <label for="voiceSelect">Voice</label>
+        <select id="voiceSelect"></select>
+      </div>
+      <div class="field-group half">
+        <label for="rateSlider">Speech speed <span class="rate-value" id="rateValue">0%</span></label>
+        <input type="range" id="rateSlider" min="-50" max="50" step="5" value="0">
+      </div>
+    </section>
+
+    <section class="actions-row">
+      <button id="convertBtn" class="btn btn-primary">
+        <span class="btn-icon">&#9654;</span> Convert &amp; Play
+      </button>
+      <button id="downloadBtn" class="btn btn-secondary" disabled>
+        <span class="btn-icon">&#8681;</span> Download
+      </button>
+      <button id="clearBtn" class="btn btn-ghost">
+        <span class="btn-icon">&#128465;</span> Clear
+      </button>
+    </section>
+
+    <div class="status-bar" id="statusBar">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Ready</span>
+    </div>
+
+    <audio id="player" style="display:none;"></audio>
+
+  </main>
+
+  <section class="card history-card">
+    <h2>Conversion history</h2>
+    <div class="table-wrap">
+      <table id="historyTable">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Text</th>
+            <th>Voice</th>
+            <th>Play</th>
+            <th>Download</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr class="empty-row"><td colspan="6">No conversions yet — your history will show up here.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
